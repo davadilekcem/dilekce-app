@@ -25,9 +25,7 @@ async function uret() {
     },
     body: JSON.stringify({ konu })
   });
-  
-app.post("/api/generate", async (req, res) => {
-  
+
   const data = await res.json();
 
   document.getElementById("sonuc").innerText = data.dilekce;
@@ -36,5 +34,6 @@ app.post("/api/generate", async (req, res) => {
 
 </body>
 </html>
+
 
 
