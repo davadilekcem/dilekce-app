@@ -5,35 +5,84 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dilekçe Oluşturucu</title>
-
-<link rel="manifest" href="manifest.json">
-
-<meta name="theme-color" content="#000000">
+<title>Dilekçe Oluşturucu Pro</title>
 
 <style>
 
 body{
-font-family: Arial;
-padding: 15px;
+font-family: "Times New Roman", serif;
+background:#f4f6f8;
+margin:0;
 }
 
-input, textarea, select, button{
-width: 100%;
-padding: 12px;
-margin: 5px 0;
-font-size: 16px;
+.container{
+max-width:800px;
+margin:40px auto;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+}
+
+input, textarea, select{
+width:100%;
+padding:12px;
+margin:8px 0;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:16px;
 }
 
 button{
-background: black;
-color: white;
-border: none;
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+background:#0b5ed7;
+color:white;
+font-size:16px;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+background:#084298;
 }
 
 #output{
-white-space: pre-wrap;
-margin-top: 20px;
+margin-top:30px;
+white-space:pre-wrap;
+font-family:"Times New Roman", serif;
+}
+
+@media print{
+
+body *{
+visibility:hidden;
+}
+
+#printArea, #printArea *{
+visibility:visible;
+}
+
+#printArea{
+position:absolute;
+left:0;
+top:0;
+width:100%;
+}
+
+}
+
+footer{
+text-align:center;
+margin-top:20px;
+font-size:12px;
+color:gray;
 }
 
 </style>
@@ -41,78 +90,111 @@ margin-top: 20px;
 </head>
 <body>
 
-<h2>Dilekçe Oluşturucu</h2>
+<div class="container">
+
+<h1>Dilekçe Oluşturucu</h1>
 
 <select id="konu">
-<option value="kira">Kira</option>
-<option value="bosanma">Boşanma</option>
-<option value="trafik">Trafik</option>
-<option value="isci">İşçi</option>
-<option value="suc">Suç duyurusu</option>
+<option value="Kira uyuşmazlığı">Kira uyuşmazlığı</option>
+<option value="Boşanma">Boşanma</option>
+<option value="Trafik cezası">Trafik cezası</option>
+<option value="Tahliye davası">Tahliye davası</option>
 </select>
 
 <input id="ad" placeholder="Ad Soyad">
+
 <textarea id="adres" placeholder="Adres"></textarea>
 
-<input id="davali" placeholder="Davalı">
+<input id="davali" placeholder="Karşı taraf">
 
-<textarea id="aciklama" placeholder="Açıklama"></textarea>
+<textarea id="olay" placeholder="Olayı kendi cümlelerinle yaz"></textarea>
 
-<button onclick="uret()">Dilekçe oluştur</button>
+<button onclick="olustur()">AI ile Dilekçe Oluştur</button>
 
 <button onclick="window.print()">Yazdır</button>
 
+<div id="printArea">
 <pre id="output"></pre>
+</div>
+
+<footer>
+Bu uygulama hukuki danışmanlık yerine geçmez.
+</footer>
+
+</div>
 
 <script>
 
 function mahkemeSec(k){
 
-if(k=="kira") return "SULH HUKUK MAHKEMESİ";
-if(k=="bosanma") return "AİLE MAHKEMESİ";
-if(k=="trafik") return "SULH CEZA HAKİMLİĞİ";
-if(k=="isci") return "İŞ MAHKEMESİ";
-if(k=="suc") return "CUMHURİYET BAŞSAVCILIĞI";
+if(k.includes("Kira") || k.includes("Tahliye"))
+return "SULH HUKUK MAHKEMESİ";
+
+if(k.includes("Boşanma"))
+return "AİLE MAHKEMESİ";
+
+if(k.includes("Trafik"))
+return "SULH CEZA HAKİMLİĞİ";
+
+return "MAHKEMESİ";
 
 }
 
-function uret(){
+async function olustur(){
 
-let metin = `
-T.C.
+let konu = document.getElementById("konu").value;
+let ad = document.getElementById("ad").value;
+let adres = document.getElementById("adres").value;
+let davali = document.getElementById("davali").value;
+let olay = document.getElementById("olay").value;
 
-İSTANBUL NÖBETÇİ ${mahkemeSec(konu.value)}
+let mahkeme = mahkemeSec(konu);
 
-DAVACI
-${ad.value}
+let prompt = `
+Türk hukukuna uygun resmi dilekçe yaz.
 
-DAVALI
-${davali.value}
+Mahkeme: ${mahkeme}
 
-AÇIKLAMA
-${aciklama.value}
+Davacı: ${ad}
 
-İMZA
-${ad.value}
+Davalı: ${davali}
+
+Konu: ${konu}
+
+Olay: ${olay}
+
+Resmi, profesyonel, mahkemeye sunulabilir şekilde yaz.
 `;
 
-output.innerText = metin;
+let cevap = await fetch("https://api.openai.com/v1/chat/completions",{
 
-localStorage.setItem("ad", ad.value);
-localStorage.setItem("adres", adres.value);
+method:"POST",
 
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer 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"
+},
+
+body:JSON.stringify({
+
+model:"gpt-4o-mini",
+
+messages:[
+{
+role:"user",
+content:prompt
 }
+]
 
-ad.value = localStorage.getItem("ad") || "";
-adres.value = localStorage.getItem("adres") || "";
+})
 
-</script>
+});
 
-<script>
+let data = await cevap.json();
 
-if('serviceWorker' in navigator){
+let metin = data.choices[0].message.content;
 
-navigator.serviceWorker.register('sw.js');
+document.getElementById("output").innerText = metin;
 
 }
 
