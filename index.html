@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dilekçe Oluşturucu</title>
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#000000">
+
+<style>
+
+body{
+font-family: Arial;
+padding: 15px;
+}
+
+input, textarea, select, button{
+width: 100%;
+padding: 12px;
+margin: 5px 0;
+font-size: 16px;
+}
+
+button{
+background: black;
+color: white;
+border: none;
+}
+
+#output{
+white-space: pre-wrap;
+margin-top: 20px;
+}
+
+</style>
+
+</head>
+<body>
+
+<h2>Dilekçe Oluşturucu</h2>
+
+<select id="konu">
+<option value="kira">Kira</option>
+<option value="bosanma">Boşanma</option>
+<option value="trafik">Trafik</option>
+<option value="isci">İşçi</option>
+<option value="suc">Suç duyurusu</option>
+</select>
+
+<input id="ad" placeholder="Ad Soyad">
+<textarea id="adres" placeholder="Adres"></textarea>
+
+<input id="davali" placeholder="Davalı">
+
+<textarea id="aciklama" placeholder="Açıklama"></textarea>
+
+<button onclick="uret()">Dilekçe oluştur</button>
+
+<button onclick="window.print()">Yazdır</button>
+
+<pre id="output"></pre>
+
+<script>
+
+function mahkemeSec(k){
+
+if(k=="kira") return "SULH HUKUK MAHKEMESİ";
+if(k=="bosanma") return "AİLE MAHKEMESİ";
+if(k=="trafik") return "SULH CEZA HAKİMLİĞİ";
+if(k=="isci") return "İŞ MAHKEMESİ";
+if(k=="suc") return "CUMHURİYET BAŞSAVCILIĞI";
+
+}
+
+function uret(){
+
+let metin = `
+T.C.
+
+İSTANBUL NÖBETÇİ ${mahkemeSec(konu.value)}
+
+DAVACI
+${ad.value}
+
+DAVALI
+${davali.value}
+
+AÇIKLAMA
+${aciklama.value}
+
+İMZA
+${ad.value}
+`;
+
+output.innerText = metin;
+
+localStorage.setItem("ad", ad.value);
+localStorage.setItem("adres", adres.value);
+
+}
+
+ad.value = localStorage.getItem("ad") || "";
+adres.value = localStorage.getItem("adres") || "";
+
+</script>
+
+<script>
+
+if('serviceWorker' in navigator){
+
+navigator.serviceWorker.register('sw.js');
+
+}
+
+</script>
+
+</body>
+</html>
